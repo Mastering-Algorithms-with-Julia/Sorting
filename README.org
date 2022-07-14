@@ -1,0 +1,152 @@
+* 排序和搜索
+** DONE 插入排序
+[[file:src/insertsort.jl][插入排序]]
+#+begin_src julia
+  function insertsort!(data::Vector{T}, compare::Function = -) where T
+    isempty(data) && return
+  
+    for j = 2:length(data)
+      i = j - 1
+
+      key = data[j]
+      while i >= 1 && compare(data[i], key) > 0
+        data[i + 1] = data[i]
+        i -= 1
+      end
+      data[i + 1] = key
+
+    end
+  end
+#+end_src
+
+** DONE 快速排序
+[[file:src/quicksort.jl][快速排序]]
+#+begin_src julia
+  function quicksort!(data::Vector{T}, compare::Function = -) where T
+    isempty(data) && return
+
+    _quicksort!(data, 1, length(data), compare)
+  end
+  
+
+  function _quicksort!(data::Vector{T}, startIndex::Int, endIndex::Int, compare::Function) where T
+    if endIndex > startIndex
+      pivot = data[rand(startIndex:endIndex)]
+      left, right = startIndex, endIndex
+
+      while left <= right
+        while compare(data[left], pivot) < 0
+          left += 1
+        end
+
+        while compare(data[right], pivot) > 0
+          right -= 1
+        end
+
+        if left <= right
+          data[left], data[right] = data[right], data[left]
+          left += 1
+          right -= 1
+        end
+      end
+
+      _quicksort!(data, startIndex, right, compare)
+      _quicksort!(data, left, endIndex, compare)
+    end
+
+  end
+#+end_src
+
+** DONE 归并排序
+[[file:src/mergesort.jl][归并排序]]
+#+begin_src julia
+  function _mergearray!(data::Vector{T}, startIndex::Int, middleIndex::Int, endIndex::Int, temparray::Vector{T}, compare::Function) where T
+    ipos = startIndex
+    jpos = middleIndex + 1
+    mpos = 1
+
+    while ipos <= middleIndex || jpos <= endIndex
+      if ipos > middleIndex
+        while jpos <= endIndex
+          temparray[mpos] = data[jpos]
+          jpos += 1
+          mpos += 1
+        end
+
+        continue
+      elseif jpos > endIndex
+        while ipos <= middleIndex
+          temparray[mpos] = data[ipos]
+          ipos += 1
+          mpos += 1
+        end
+
+        continue
+      end
+
+      if compare(data[ipos], data[jpos]) < 0
+        temparray[mpos] = data[ipos]
+        ipos += 1
+        mpos += 1
+      else
+        temparray[mpos] = data[jpos]
+        jpos += 1
+        mpos += 1
+      end
+    end
+
+    for count in 1:(endIndex - startIndex)
+      data[startIndex + count - 1] = temparray[count]
+    end
+  end
+
+  function _mergesort!(data::Vector{T}, startIndex::Int, endIndex::Int, temparray::Vector{T}, compare::Function) where T
+    middleIndex = 0
+
+    if startIndex < endIndex
+      middleIndex = floor(Int, (startIndex + endIndex) / 2)
+      _mergesort!(data, startIndex, middleIndex, temparray, compare)
+      _mergesort!(data, middleIndex + 1, endIndex, temparray, compare)
+      _mergearray!(data, startIndex, middleIndex, endIndex, temparray, compare)
+    end
+  end
+
+  function mergesort!(data::Vector{T}, compare::Function = -) where T
+    isempty(data) && return
+  
+    temparray = Vector{T}(undef, length(data))
+    _mergesort!(data, 1, length(data), temparray, compare)
+  end
+#+end_src
+
+** DONE 计数排序
+[[file:src/countsort.jl][计数排序]]
+#+begin_src julia
+  function countsort!(data::Vector{T}) where T <: Integer
+    isempty(data) && return
+  
+    maxValue = maximum(data)
+  
+    frequences = zeros(T, maxValue + 1)
+    temparray = zeros(T, length(data))
+    for value in data
+      frequences[value] += 1
+    end
+
+    for index = 2:maxValue+1
+      frequences[index] = frequences[index] + frequences[index - 1]
+    end
+
+    for index = length(data):-1:1
+      temparray[frequences[data[index]]] = data[index]
+      frequences[data[index]] = frequences[data[index]] - 1
+    end
+
+    for index in 1:length(data)
+      data[index] = temparray[index]
+    end
+
+  end
+#+end_src
+
+** DOING 基数排序
