@@ -5,6 +5,6 @@ include("countsort.jl")
 include("insertsort.jl")
 include("mergesort.jl")
 include("quicksort.jl")
-
-export binarysearch, countsort!, insertsort!, mergesort!, quicksort!
+include("radixsort.jl")
+export binarysearch, countsort!, insertsort!, mergesort!, quicksort!, radixsort!
 end # module
